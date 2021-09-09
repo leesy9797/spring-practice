@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a th:if="${session.member} == null" href="/join">회원가입</a>
+<a th:if="${session.member} == null" href="/login">로그인</a>
+<a th:if="${session.member} != null" href="/logout">로그아웃</a>
+<a href="/boardList">게시판</a><br />
+<span th:if="${session.member} != null" th:text="${session.member.getM_id()} + ' 님 반갑습니다.'"></span>
+</body>
+</html>

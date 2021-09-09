@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="jquery-3.6.0.js"></script>
+<script>
+    /*<![CDATA[*/
+    // const like = function (x, idx) {
+    // var idx = /*[[ ${board.b_idx} ]]*/;
+    function like(x, idx) {
+        if (x == 'like')
+            $.ajax({
+                type: "POST",
+                url: "/likeOrUnlike",
+                data: {'x': x, 'idx': idx},
+                success: function (result) {
+                    if (result < 2) {   // 좋아요 실패
+                        alert("좋아요에 실패했습니다.");
+                    } else if (result == 5) {
+                      location.href = "/login";
+                    } else {   // 좋아요 성공
+                        location.reload();
+                    }
+                }
+            });
+        else
+            $.ajax({
+                type: "POST",
+                url: "/likeOrUnlike",
+                data: {'x': x, 'idx': idx},
+                success: function (result) {
+                    if (result < 2) {   // 좋아요 취소 실패
+                        alert("좋아요 취소에 실패했습니다.");
+                    } else {   // 좋아요 취소 성공
+                        location.reload();
+                    }
+                }
+            });
+    };
+    /*]]>*/
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <table th:width="800">
+        <tr>
+            <th width="*">제목</th>
+            <td th:text="${board.b_title}"></td>
+            <th width="20%">좋아요</th>
+            <td th:text="${board.b_good}"></td>
+        </tr>
+        <tr>
+            <th>작성자</th>
+            <td th:text="${board.m_id}"></td>
+            <th>작성일</th>
+            <td th:text="${#strings.substring(board.b_date,0,10)}"></td>
+        </tr>
+        <tr>
+            <th>내용</th>
+            <td th:text="${board.b_content}"></td>
+        </tr>
+    </table>
+</div>
+<div>
+    <input th:if="${session.member} != null and ${session.member.m_id.equals(board.getM_id())}" type="button" value="수정" th:onclick="|location.href='@{/boardDetail?wtype=u&idx={idx}(idx=${board.b_idx})}'|" />
+    <input th:if="${session.member} != null and ${session.member.m_id.equals(board.getM_id())}" type="button" value="삭제" th:onclick="|location.href='@{/delete?idx={idx}(idx=${board.b_idx})}'|" />
+    <input type="button" value="목록" th:onclick="|location.href='/boardList'|" />
+</div>
+<div>
+    <button th:if="${good} == null" th:attr="onclick=|like('like', '${board.b_idx}')|">좋아요</button>
+    <button th:if="${good} != null" th:attr="onclick=|like('unlike', '${board.b_idx}')|">좋아요 취소</button>
+    <!--    <input th:if="${good} == null" type="button" value="좋아요" th:onclick="'javascript:like(\'like\');'" />-->
+    <!--    <input th:if="${good} != null" type="button" value="좋아요 취소" th:onclick="'javascript:like(\'unlike\');'" />-->
+    <!--    <input th:if="${good} == null" type="button" value="좋아요" th:onclick="|javascript:like('like')|" />-->
+    <!--    <input th:if="${good} != null" type="button" value="좋아요 취소" th:onclick="|javascript:like('unlike')|" />-->
+
+    <!--    <input th:if="${good} == null" type="button" value="좋아요" th:onclick="|javascript:like('like', '${board.b_idx}', '${session.member.m_id}')|" />-->
+    <!--    <input th:if="${good} != null" type="button" value="좋아요 취소" th:onclick="|javascript:like('unlike', '${board.b_idx}', '${session.member.m_id}')|" />-->
+</div>
+<div th:if="${session.member} != null">
+    <form action="regReply" method="post">
+        <input type="hidden" name="b_idx" th:value="${board.b_idx}">
+        <input type="hidden" name="m_id" th:value="${board.m_id}">
+        <input type="text" size="40" name="r_content" />
+        <input type="submit" value="등록" />
+    </form>
+</div>
+<div>
+<table id="replyTable" width="500">
+    <tr th:if="${#lists.size(replyList)} > 0" th:align="center" th:each="reply : ${replyList}">
+        <td width="15%" th:text="${reply.m_id}"></td>
+        <td width="*" th:align="left" th:text="${reply.r_content}"></td>
+        <td width="20%" th:text="${#strings.substring(reply.r_date,0,10)}"></td>
+        <td width="10%" th:if="${session.member} != null and ${session.member.m_id.equals(reply.getM_id())}">
+            <input type="button" value="[x]" th:onclick="|location.href='@{/delReply?r_idx={r_idx}&b_idx={b_idx}(r_idx=${reply.r_idx}, b_idx=${board.b_idx})}'|" />
+        </td>
+    </tr>
+</table>
+</div>
+</body>
+</html>
